@@ -31,32 +31,28 @@ echo ""
 echo ""
 echo ""
 echo "${LYLO}create configure...${N}" && sleep 2
-if [ ! -e configure ]; then
+# Always force-clean autotools artifacts so configure is never stale or malformed
 rm -rf autom4te.cache
-       rm -f Makefile.in aclocal.m4 autom4te.cache compat/Makefile.in
-       rm -f compile config.guess config.sub config.status configure
-       rm -f cpuminer-config.h.in depcomp install-sh missing
-       if ./autogen.sh; then
-                echo "                              ${GR}=> done.${N}" && sleep 3
-        else
-                exit 1
-        fi
+rm -f Makefile.in aclocal.m4 compat/Makefile.in
+rm -f compile config.guess config.sub config.status configure
+rm -f cpuminer-config.h.in depcomp install-sh missing config.log
+if ./autogen.sh; then
+        echo "                              ${GR}=> done.${N}" && sleep 3
+else
+        exit 1
 fi
 echo "${LYLO}cleaning previus build...${N}" && sleep 3
 if [ -e Makefile ]; then
-echo " ${LBLU}clean${N}"
-       ./clean.sh
-       ./autogen.sh
+        echo " ${LBLU}clean${N}"
+        make distclean 2>/dev/null || true
 fi
 echo "                              ${GR}=> done.${N}" && sleep 3
 # --disable-assembly: some ASM code doesn't build on ARM
-# Note: we don't enable -flto, it doesn't bring anything here but slows down
-# the build a lot. If needed, just add -flto to the CFLAGS string.
-# Termux/Android uses clang — do not use gcc/g++ here, it will fail with
-# "C compiler cannot create executables"
-# normal build.
+# Termux/Android uses clang — do not use gcc/g++, it will fail configure
 echo "${LYLO}configuring.....${N}" && sleep 3
-./configure --with-crypto --with-curl --disable-assembly CC=clang CXX=clang++ CFLAGS="-Ofast -fuse-linker-plugin -ftree-loop-if-convert-stores -march=native" LDFLAGS="-march=native"
+CC=clang CXX=clang++ ./configure --with-crypto --with-curl --disable-assembly \
+        CFLAGS="-Ofast -fuse-linker-plugin -ftree-loop-if-convert-stores -march=native" \
+        LDFLAGS="-march=native"
 [ $? = 0 ] || exit $?
 echo "                              ${GR}=> done.${N}" && sleep 3
 if [ -z "$NPROC" ]; then
@@ -66,10 +62,10 @@ fi
 
 echo "${LYLO}building process please wait...${N}" && sleep 3
 
-make install -j $NPROC
+make -j $NPROC
 
 if [ $? != 0 ]; then
-	echo "                              ${LRD}ERROR...!!!"
+        echo "                              ${LRD}ERROR...!!!"
         echo "${LRD}Compilation failed (make=$?)".
         echo "${LMA}Common causes: missing libjansson-dev libcurl4-openssl-dev libssl-dev"
         echo "${LYL}If you pulled updates into this directory, remove configure and try again.${N}"
