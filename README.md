@@ -148,12 +148,28 @@ _OR_
  apt-get install automake autoconf pkg-config libcurl4-openssl-dev libjansson-dev libssl-dev libgmp-dev zlib1g-dev make g++ libtool
 ```
 
-#### if build with ubuntu on android:
+#### if build with ubuntu on android / Termux:
 
+**Important:** Termux uses a clang-based toolchain. Do **not** use `gcc` — it will fail with
+`configure: error: C compiler cannot create executables`. Always build with the default
+Termux clang toolchain.
+
+Install dependencies first:
 ```
-Use
+pkg update && pkg upgrade -y
+pkg install -y clang make autoconf automake libtool pkg-config git
+```
+
+Then build:
+```
+unset CC CXX CFLAGS CPPFLAGS LDFLAGS LIBS
+rm -f config.log config.status Makefile configure
+./autogen.sh
 ./build-android.sh
 ```
+
+If you see `C compiler cannot create executables` — do not switch to gcc. Clear your environment
+variables with `unset CC CXX CFLAGS CPPFLAGS LDFLAGS LIBS` and retry from `./autogen.sh`.
 
 
 #### Note for OS X users:
