@@ -96,6 +96,7 @@
 
 #include "insecure_memzero-p2b.h"
 #include "sha256-p2b.h"
+#include "blake2b.h"
 #include "sysendian-p2b.h"
 
 #include "yespower-p2b.h"
@@ -545,8 +546,8 @@ static volatile uint64_t Smask2var = Smask2;
 	    "pmuludq %1, %0\n\t" \
 	    "movl %%eax, %%ecx\n\t" \
 	    "shrq $0x20, %%rax\n\t" \
-	    "paddq (%3,%%" REGISTER_PREFIX "cx), %0\n\t" \
-	    "pxor (%4,%%" REGISTER_PREFIX "ax), %0\n\t" \
+	    "paddq (%3,%%"  REGISTER_PREFIX "cx), %0\n\t" \
+	    "pxor (%4,%%"  REGISTER_PREFIX "ax), %0\n\t" \
 	    : "+x" (X), "=x" (H) \
 	    : "d" (Smask2), "S" (S0), "D" (S1) \
 	    : "cc", "ax", "cx"); \
