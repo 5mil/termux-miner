@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "crypto/oaes_lib.h"
 #include "crypto/c_keccak.h"
 #include "crypto/c_groestl.h"
@@ -20,9 +21,9 @@
 #include <malloc.h>
 #endif
 
-#define MEMORY          2097152 /* 2 MiB 2^21 */
-#define ITER            524288 /* 2^19 */
-#define ITER_DIV        262144 /* 2^18 */
+#define MEMORY          262144 /* 256KB - 2^18 */
+#define ITER            131072 /* 2^17 */
+#define ITER_DIV        65536  /* 2^16 */
 #define AES_BLOCK_SIZE  16
 #define AES_KEY_SIZE    32 /*16*/
 #define INIT_SIZE_BLK   8
@@ -204,7 +205,11 @@ struct cryptonightfast_ctx {
 };
 
 void cryptonightfast_hash(const char* input, char* output, uint32_t len, int variant) {
-    struct cryptonightfast_ctx *ctx = malloc(sizeof(struct cryptonightfast_ctx));
+#if defined(_MSC_VER)
+    struct cryptonightfast_ctx *ctx = _malloca(sizeof(struct cryptonightfast_ctx));
+#else
+    struct cryptonightfast_ctx *ctx = alloca(sizeof(struct cryptonightfast_ctx));
+#endif
     hash_process(&ctx->state.hs, (const uint8_t*) input, len);
     memcpy(ctx->text, ctx->state.init, INIT_SIZE_BYTE);
     memcpy(ctx->aes_key, ctx->state.hs.b, AES_KEY_SIZE);
@@ -287,7 +292,6 @@ void cryptonightfast_hash(const char* input, char* output, uint32_t len, int var
     /*memcpy(hash, &state, 32);*/
     extra_hashes[ctx->state.hs.b[0] & 3](&ctx->state, 200, output);
     oaes_free((OAES_CTX **) &ctx->aes_ctx);
-    free(ctx);
 }
 
 void cryptonightfast_fast_hash(const char* input, char* output, uint32_t len) {

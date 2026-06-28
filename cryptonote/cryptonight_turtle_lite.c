@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "crypto/oaes_lib.h"
 #include "crypto/c_keccak.h"
 #include "crypto/c_groestl.h"
@@ -20,9 +21,9 @@
 #include <malloc.h>
 #endif
 
-#define MEMORY          262144 /* 256KB - 2^18 */
+#define MEMORY          262144 /* 256 KiB - 2^18 */
 #define ITER            131072 /* 2^17 */
-#define ITER_DIV        65536 /* 2^16 */
+#define ITER_DIV        65536  /* 2^16 */
 #define AES_BLOCK_SIZE  16
 #define AES_KEY_SIZE    32 /*16*/
 #define INIT_SIZE_BLK   8
