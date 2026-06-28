@@ -52,13 +52,15 @@ echo "                              ${GR}=> done.${N}" && sleep 3
 # --disable-assembly: some ASM code doesn't build on ARM
 # Note: we don't enable -flto, it doesn't bring anything here but slows down
 # the build a lot. If needed, just add -flto to the CFLAGS string.
+# Termux/Android uses clang — do not use gcc/g++ here, it will fail with
+# "C compiler cannot create executables"
 # normal build.
 echo "${LYLO}configuring.....${N}" && sleep 3
-./configure --with-crypto --with-curl --disable-assembly CC=gcc CXX=g++ CFLAGS="-Ofast -fuse-linker-plugin -ftree-loop-if-convert-stores -march=native" LDFLAGS="-march=native"
+./configure --with-crypto --with-curl --disable-assembly CC=clang CXX=clang++ CFLAGS="-Ofast -fuse-linker-plugin -ftree-loop-if-convert-stores -march=native" LDFLAGS="-march=native"
 [ $? = 0 ] || exit $?
 echo "                              ${GR}=> done.${N}" && sleep 3
 if [ -z "$NPROC" ]; then
-        NPROC=$(nproc 6>/dev/null)
+        NPROC=$(nproc 2>/dev/null)
         NPROC=${NPROC:-1}
 fi
 
